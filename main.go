@@ -48,6 +48,27 @@ func main() {
 		return c.HTML(200, pageHTML)
 	})
 
+	e.GET("/slot/:id", func(c echo.Context) error {
+		slotID := c.Param("id")
+		slot, ok := data.FindSlot(slotID)
+		if !ok {
+			msg := fmt.Sprintf("Slot '%s' not found.", slotID)
+			return echo.NewHTTPError(echo.ErrNotFound.Code, msg)
+		}
+
+		bodyHTML, err := execTemplate(t, "slot.go.html", slot)
+		if err != nil {
+			return err
+		}
+
+		pageHTML, err := execTemplate(t, "page.go.html", template.HTML(bodyHTML))
+		if err != nil {
+			return err
+		}
+
+		return c.HTML(200, pageHTML)
+	})
+
 	port := getPort()
 	e.Logger.Fatal(e.Start(fmt.Sprintf(":%d", port)))
 }
